@@ -91,7 +91,7 @@ Tuned XGBoost was selected. A model that guesses scores 0.20 accuracy and about 
 classes, so the baselines were confidently wrong and tuning fixed the calibration. Accuracy stays low
 because 117 rows across 5 categories is a small dataset and the social features barely separate the
 classes, which the correlation matrix and the feature importance chart both show.
-```
+
 
 ## 2. Facial recognition model
 
