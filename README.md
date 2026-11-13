@@ -11,9 +11,9 @@ denied.
 
 | Item | Link |
 | --- | --- |
-| Demo video | To be added |
-| Report | To be added |
-| Contribution tracker | To be added |
+| Demo video | [https://youtu.be/7eo35uVNTMc](https://youtu.be/7eo35uVNTMc) |
+| Report | [Multimodal Data Preprocessing Report](https://docs.google.com/document/d/1FM-0uddmthaTTCjWLR-usuTwSWouglpHrsD04o4rgqk/edit?tab=t.0#heading=h.ta7nb5idig5q) |
+| Contribution tracker | [ML Pipeline Task Sheet, Group 11](https://docs.google.com/spreadsheets/d/1nO_AxQ_Mabwoh3_F5_F7LJzwCG1Tg0AM_vAg7T540jk/edit?usp=sharing) |
 
 ## Repository structure
 
@@ -22,7 +22,8 @@ datasets/
   customer_transactions - customer_transactions.csv
   customer_social_profiles - customer_social_profiles.csv
   merged_customer_data.csv
-  image_features.csv
+  image_features (1).csv             image features for all four members (used by the app)
+  image_features.csv                 earlier version with three members
 audio_features.csv
 notebooks/
   Group_11_product_recommendation_model.ipynb
@@ -35,6 +36,7 @@ models/
   voiceprint_model.joblib
 audio_pipeline.py                    audio loading, augmentation and feature extraction
 voiceprint_model.py                  voiceprint model training and verification
+face_auth.py                         standalone face authentication script
 app.py                               CLI application (system simulation)
 feature_extraction.py                turns a new photo or recording into model features
 model_utils.py                       loads the three models
@@ -46,6 +48,8 @@ README.md
 ```
 
 ## How to run
+
+To run the system simulation, see section 4 below or [CLI_APP.md](CLI_APP.md).
 
 The notebooks are written for Google Colab.
 
@@ -106,14 +110,52 @@ classes, which the correlation matrix and the feature importance chart both show
 
 ## 2. Facial recognition model
 
-To be added.
+Done by David Ngarambe. Notebook: `notebooks/Formative2_ImagePipeline_David (1).ipynb`.
+
+Identifies which team member is in a face photo. Each of the four members gave three photos
+(neutral, smiling, surprised), 12 originals in total.
+
+**Preprocessing and augmentation.** Each photo is cropped to the face with a cascade face detector
+and resized to 224x224. Five augmentations are applied to every photo (rotation, horizontal flip,
+grayscale, brightness, Gaussian noise), giving 6 versions per photo and 72 samples.
+
+**Features.** 1,328 values per sample: a 16-bin colour histogram per RGB channel (48 values) and a
+MobileNetV2 embedding (1,280 values), saved in `datasets/image_features (1).csv`.
+
+**Model.** Logistic Regression on standardised features, trained on the neutral and smiling photos
+and tested on the surprised photos, an expression it never saw in training. It reaches accuracy and
+macro F1 of 1.0 on that test set. A face is accepted only when a face is detected and the top class
+probability is at least 0.60.
 
 ## 3. Voiceprint verification model
 
-To be added.
+Done by Faith Irakoze. Notebook: `notebooks/audio_voiceprint.ipynb`; code: `audio_pipeline.py`
+and `voiceprint_model.py`.
+
+Identifies which team member is speaking. Each of the four members recorded two phrases, "Yes,
+approve" and "Confirm transaction", 8 recordings in total.
+
+**Preprocessing and augmentation.** Recordings are converted to mono at 16,000 Hz and trimmed of
+silence. Each one is augmented with a time stretch and added background noise, giving 24 samples.
+
+**Features.** 35 values per sample: the mean and standard deviation of 13 MFCCs, spectral roll-off,
+RMS energy and total energy, spectral centroid, bandwidth, zero-crossing rate and duration, saved in
+`audio_features.csv`.
+
+**Results.** Leave-one-recording-out, scored on the 8 original recordings.
+
+| Model | Accuracy | Macro F1 | Log Loss |
+| --- | --- | --- | --- |
+| **Logistic Regression** | **0.875** | **0.867** | **0.549** |
+| Random Forest | 0.625 | 0.617 | 0.850 |
+
+Logistic Regression was selected and saved as `models/voiceprint_model.joblib`. A voice is accepted
+only when the predicted speaker matches the claimed identity with a probability of at least 0.60.
 
 ## 4. System simulation (CLI application)
 
+Done by Marie Honette Ihozo. Full guide: [CLI_APP.md](CLI_APP.md). Demo:
+[https://youtu.be/7eo35uVNTMc](https://youtu.be/7eo35uVNTMc).
 
 `app.py` runs the whole flow from the command line. A face photo is checked by the facial
 recognition model; a recognised face unlocks the product recommendation model, whose prediction is
@@ -137,7 +179,7 @@ person from outside the group.
 | Member | Part |
 | --- | --- |
 | Steven Kayitare | Data merge and product recommendation model |
-| To be added | Facial recognition model |
-| To be added | Voiceprint verification model |
+| David Ngarambe | Image pipeline and facial recognition model |
+| Faith Irakoze | Audio pipeline and voiceprint verification model |
 | Marie Honette Ihozo | CLI application and system simulation |
 

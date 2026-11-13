@@ -38,7 +38,7 @@ accepted, the path to a voice recording. Dragging a file into the terminal types
    - a face is detected,
    - the model's confidence is at least `face_threshold` (0.60), and
    - the photo's embedding has a cosine similarity of at least `face_min_similarity` (0.60) with
-     that member's enrolled photos in `datasets/image_features.csv`.
+     that member's enrolled photos in `datasets/image_features (1).csv`.
 2. **Product recommendation model.** A recognised face unlocks the product model. It runs on the
    member's customer record from `datasets/merged_customer_data.csv`, and the prediction is held
    without being shown.
@@ -55,8 +55,8 @@ attempt is appended to `logs/access_log.csv` (menu option 2 shows the last ten).
 
 **Why the similarity and distance checks exist.** Both classifiers can only answer with one of the
 enrolled members, so a stranger is always assigned to somebody, often with high confidence. In
-testing, a photo of a person outside the group was classified as david at 98% confidence; its
-similarity to David's enrolled photos was 0.43, so the similarity check denied it. The thresholds
+testing, a photo of a person outside the group was classified as honette at 90% confidence; its
+similarity to Honette's enrolled photos was 0.49, so the similarity check denied it. The thresholds
 come from `evaluate_models.py`, which prints how similar each member's samples are to their own
 other samples (face 0.75 to 0.93, voice distance 3.8 to 6.7). The voice distance check only
 catches recordings that are very unlike the enrolled ones, such as non-speech audio; with two
@@ -73,9 +73,8 @@ recordings per member it cannot separate a stranger's voice reliably.
 
 ## Who can log in
 
-The facial recognition model was trained on david, faith and steven. The voiceprint model also
-knows honette. A member needs both, so honette cannot pass the face step until the face model is
-retrained with her photos. The app lists this when it starts.
+All four members (david, faith, honette, steven) are enrolled in both the facial recognition and
+the voiceprint model. The app lists the registered users when it starts.
 
 ## config.json
 
@@ -94,7 +93,7 @@ with each customer's transactions kept together, because they share identical fe
 
 | Model | Scored samples | Accuracy | F1 (weighted) | Log loss | Chance accuracy |
 |---|---|---|---|---|---|
-| Facial recognition | 9 photos | 1.000 | 1.000 | 0.090 | 0.333 |
+| Facial recognition | 12 photos | 0.917 | 0.914 | 0.091 | 0.250 |
 | Voiceprint verification | 8 recordings | 0.875 | 0.867 | 0.549 | 0.250 |
 | Product recommendation | 117 transactions | 0.171 | 0.147 | 2.096 | 0.200 |
 
