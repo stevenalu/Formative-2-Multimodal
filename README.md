@@ -71,8 +71,6 @@ If you rename them, update the two paths in the data loading cell. The notebook 
 
 ## 1. Data merge and product recommendation model
 
-Done by Steven Kayitare.
-
 Predicts the product category a customer is likely to buy from their social media behaviour.
 
 **Cleaning.** 10 missing values in `customer_rating` filled with the median of 3.0. 5 exact duplicate
@@ -110,7 +108,7 @@ classes, which the correlation matrix and the feature importance chart both show
 
 ## 2. Facial recognition model
 
-Done by David Ngarambe. Notebook: `notebooks/Formative2_ImagePipeline_David (1).ipynb`.
+Notebook: `notebooks/Formative2_ImagePipeline_David (1).ipynb`.
 
 Identifies which team member is in a face photo. Each of the four members gave three photos
 (neutral, smiling, surprised), 12 originals in total.
@@ -129,7 +127,7 @@ probability is at least 0.60.
 
 ## 3. Voiceprint verification model
 
-Done by Faith Irakoze. Notebook: `notebooks/audio_voiceprint.ipynb`; code: `audio_pipeline.py`
+Notebook: `notebooks/audio_voiceprint.ipynb`; code: `audio_pipeline.py`
 and `voiceprint_model.py`.
 
 Identifies which team member is speaking. Each of the four members recorded two phrases, "Yes,
@@ -154,7 +152,7 @@ only when the predicted speaker matches the claimed identity with a probability 
 
 ## 4. System simulation (CLI application)
 
-Done by Marie Honette Ihozo. Full guide: [CLI_APP.md](CLI_APP.md). Demo:
+Full guide: [CLI_APP.md](CLI_APP.md). Demo:
 [https://youtu.be/7eo35uVNTMc](https://youtu.be/7eo35uVNTMc).
 
 `app.py` runs the whole flow from the command line. A face photo is checked by the facial
