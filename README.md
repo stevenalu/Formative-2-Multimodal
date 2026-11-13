@@ -22,15 +22,26 @@ datasets/
   customer_transactions - customer_transactions.csv
   customer_social_profiles - customer_social_profiles.csv
   merged_customer_data.csv
-  image_features.csv                 to be added
-  audio_features.csv                 to be added
+  image_features.csv
+audio_features.csv
 notebooks/
   Group_11_product_recommendation_model.ipynb
-  (facial recognition notebook, to be added)
-  (voiceprint verification notebook, to be added)
+  Formative2_ImagePipeline_David (1).ipynb
+  audio_voiceprint.ipynb
 models/
   product_recommendation_model.joblib
-app.py                               CLI application, to be added
+  face_model_logreg.pkl
+  face_scaler.pkl
+  voiceprint_model.joblib
+audio_pipeline.py                    audio loading, augmentation and feature extraction
+voiceprint_model.py                  voiceprint model training and verification
+app.py                               CLI application (system simulation)
+feature_extraction.py                turns a new photo or recording into model features
+model_utils.py                       loads the three models
+evaluate_models.py                   accuracy, F1 and log loss for all three models
+config.json                          thresholds, file paths and member-to-customer mapping
+requirements.txt
+CLI_APP.md                           full guide to the CLI application
 README.md
 ```
 
@@ -103,7 +114,23 @@ To be added.
 
 ## 4. System simulation (CLI application)
 
-To be added.
+Done by Marie Honette Ihozo. Full guide: [CLI_APP.md](CLI_APP.md).
+
+`app.py` runs the whole flow from the command line. A face photo is checked by the facial
+recognition model; if it is accepted, a voice recording must be recognised as the same member by
+the voiceprint model; only then does the product recommendation model run and show its prediction.
+Any failed check prints `ACCESS DENIED` and no prediction is made.
+
+```
+pip install -r requirements.txt
+python app.py                                      # interactive menu
+python app.py --face photo.jpg --voice clip.wav    # one transaction
+python evaluate_models.py                          # metrics for all three models
+```
+
+Because both classifiers always answer with one of the enrolled members, the app also requires the
+new photo and recording to be close to that member's enrolled samples, which is what rejects a
+person from outside the group.
 
 ## Team contributions
 
@@ -112,5 +139,5 @@ To be added.
 | Steven Kayitare | Data merge and product recommendation model |
 | To be added | Facial recognition model |
 | To be added | Voiceprint verification model |
-| To be added | CLI application and system simulation |
+| Marie Honette Ihozo | CLI application and system simulation |
 

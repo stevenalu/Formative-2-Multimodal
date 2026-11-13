@@ -1,0 +1,22 @@
+{
+  "face_model": "models/face_model_logreg.pkl",
+  "face_scaler": "models/face_scaler.pkl",
+  "voice_model": "models/voiceprint_model.joblib",
+  "product_model": "models/product_recommendation_model.joblib",
+
+  "image_features_csv": "datasets/image_features.csv",
+  "audio_features_csv": "audio_features.csv",
+  "merged_dataset": "datasets/merged_customer_data.csv",
+
+  "face_threshold": 0.60,
+  "voice_threshold": 0.60,
+  "face_min_similarity": 0.60,
+  "voice_max_distance": 10.0,
+
+  "users": {
+    "honette": 151,
+    "steven": 187,
+    "david": 174,
+    "faith": 160
+  }
+}
