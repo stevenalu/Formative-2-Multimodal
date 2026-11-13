@@ -1,0 +1,12 @@
+numpy
+pandas
+scikit-learn==1.6.1
+xgboost
+joblib
+librosa
+soundfile
+matplotlib
+opencv-python
+scikit-image
+tensorflow
+imageio-ffmpeg
