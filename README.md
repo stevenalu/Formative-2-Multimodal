@@ -117,9 +117,10 @@ To be added.
 Done by Marie Honette Ihozo. Full guide: [CLI_APP.md](CLI_APP.md).
 
 `app.py` runs the whole flow from the command line. A face photo is checked by the facial
-recognition model; if it is accepted, a voice recording must be recognised as the same member by
-the voiceprint model; only then does the product recommendation model run and show its prediction.
-Any failed check prints `ACCESS DENIED` and no prediction is made.
+recognition model; a recognised face unlocks the product recommendation model, whose prediction is
+held; the prediction is displayed only after a voice recording is recognised as the same member by
+the voiceprint model. A failed face check stops before any prediction is made, and a failed voice
+check discards the prediction without showing it.
 
 ```
 pip install -r requirements.txt

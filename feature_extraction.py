@@ -6,6 +6,9 @@ Audio: calls load_audio and extract_features from audio_pipeline.py, the same co
        that produced audio_features.csv, so the two can never drift apart.
 """
 import os
+import shutil
+import subprocess
+import tempfile
 
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")  # keep TensorFlow start-up messages off the screen
 
@@ -94,11 +97,53 @@ def extract_image_features(path):
     return np.concatenate([_color_histogram(face), emb])
 
 
+def _ffmpeg_exe():
+    """Path to an ffmpeg program: the system one, else the copy bundled with imageio-ffmpeg."""
+    exe = shutil.which("ffmpeg")
+    if exe:
+        return exe
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return None
+
+
+def _to_wav(path):
+    """Convert a recording the audio library cannot open itself (phone .m4a, .aac, .mp4) to a
+    temporary .wav file. Works on Windows, macOS and Linux: imageio-ffmpeg (in requirements.txt)
+    ships its own ffmpeg, so nothing has to be installed separately."""
+    out = tempfile.NamedTemporaryFile(suffix=".wav", delete=False).name
+    ffmpeg = _ffmpeg_exe()
+    if ffmpeg:
+        cmd = [ffmpeg, "-y", "-loglevel", "error", "-i", path, out]
+    elif shutil.which("afconvert"):  # macOS built-in, last resort
+        cmd = ["afconvert", "-f", "WAVE", "-d", "LEI16", path, out]
+    else:
+        os.remove(out)
+        raise ValueError("this audio format needs ffmpeg: run 'pip install imageio-ffmpeg' or use a .wav recording")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0 or os.path.getsize(out) == 0:
+        os.remove(out)
+        raise ValueError("the recording could not be decoded (is it a valid audio file?)")
+    return out
+
+
 def extract_audio_features(path):
     """Return the feature dict for one recording, using the audio pipeline's own functions."""
+    import soundfile as sf
     from audio_pipeline import SR, extract_features, load_audio
 
-    y = load_audio(path)
+    converted = None
+    try:
+        sf.info(path)                 # formats read directly: .wav, .flac, .ogg, .mp3
+    except Exception:
+        converted = _to_wav(path)     # everything else, e.g. .m4a from a phone
+    try:
+        y = load_audio(converted or path)
+    finally:
+        if converted:
+            os.remove(converted)
     if len(y) < SR * 0.2 or not np.any(y):
         raise ValueError("recording is silent or shorter than 0.2 seconds")
     return extract_features(y)

@@ -6,12 +6,12 @@ Multimodal decision logic:
               user with confidence >= face_threshold, AND the photo must resemble that
               user's enrolled photos (similarity >= face_min_similarity). Otherwise
               ACCESS DENIED.
-  2. VOICE    audio -> voiceprint model. The best match must be the SAME user the face
+  2. PRODUCT  a recognised face unlocks the product recommendation model. It runs on
+              that user's customer record, and the prediction is held, not shown.
+  3. VOICE    audio -> voiceprint model. The best match must be the SAME user the face
               step identified, with confidence >= voice_threshold, AND the recording must
               be close to that user's enrolled recordings (distance <= voice_max_distance).
-              Otherwise ACCESS DENIED.
-  3. PRODUCT  only after both checks pass, the product recommendation model runs on that
-              user's customer record and the prediction is displayed.
+              Only then is the held prediction displayed; otherwise it is discarded.
 
 Usage:
   python app.py                                     interactive menu
@@ -87,7 +87,7 @@ class System:
             raise AccessDenied("face", f"photo does not resemble {user}'s enrolled photos")
         return user, conf
 
-    # ---- step 2 ----
+    # ---- step 3 ----
     def verify_voice(self, audio_path, expected_user):
         if not os.path.isfile(audio_path):
             raise AccessDenied("voice", f"audio file not found: {audio_path}")
@@ -108,7 +108,7 @@ class System:
             raise AccessDenied("voice", f"recording is too different from {speaker}'s enrolled recordings")
         return speaker, conf
 
-    # ---- step 3 ----
+    # ---- step 2 ----
     def recommend(self, user, top_n=3):
         customer_id = self.users[user.lower()]
         rows = self.customers[self.customers["customer_id"].astype(str) == str(customer_id)]
@@ -137,22 +137,27 @@ def run_transaction(system, image_path, get_audio_path):
         user, _ = system.verify_face(image_path)
         print(f"  PASSED     : welcome, {user}. You may request a product prediction.")
 
+        print("\n[2/3] PRODUCT RECOMMENDATION MODEL")
+        customer_id, ranked = system.recommend(user)
+        print(f"  Customer   : {customer_id}")
+        print("  Prediction computed and held. It is shown only after voice approval.")
+
         audio_path = get_audio_path()
-        print(f"\n[2/3] VOICE VERIFICATION\n  Recording  : {audio_path}")
+        print(f"\n[3/3] VOICE VERIFICATION\n  Recording  : {audio_path}")
         system.verify_voice(audio_path, user)
         print(f"  PASSED     : voice confirms {user}. Prediction approved.")
 
-        print("\n[3/3] PRODUCT RECOMMENDATION")
-        customer_id, ranked = system.recommend(user)
-        print(f"  Customer   : {customer_id}")
+        print(f"\n{LINE}\n TRANSACTION APPROVED - recommended products for {user}\n{LINE}")
         for i, (product, p) in enumerate(ranked, 1):
             print(f"  {i}. {product:<14}{p:>5.0%}")
-        print(f"\n{LINE}\n TRANSACTION APPROVED - recommended product for {user}: {ranked[0][0]}\n{LINE}")
+        print(f"\n Top recommendation: {ranked[0][0]}\n{LINE}")
         log_attempt(image_path, audio_path, user, "granted", None, f"recommended {ranked[0][0]}")
         return True
     except AccessDenied as e:
+        outcome = ("The held prediction was discarded without being shown." if e.stage == "voice"
+                   else "No prediction was made.")
         print(f"  FAILED     : {e.reason}")
-        print(f"\n{LINE}\n ACCESS DENIED at the {e.stage} step. No prediction was made.\n{LINE}")
+        print(f"\n{LINE}\n ACCESS DENIED at the {e.stage} step. {outcome}\n{LINE}")
         log_attempt(image_path, audio_path, user, "denied", e.stage, e.reason)
         return False
 

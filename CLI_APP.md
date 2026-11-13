@@ -12,7 +12,14 @@ Use Python 3.10 to 3.13, from the repository root:
     pip install -r requirements.txt
 
 The first run downloads the MobileNetV2 weights (about 9 MB), so it needs internet once.
-`.m4a` and `.mp3` recordings also need ffmpeg (`brew install ffmpeg`); `.wav` works without it.
+
+Notes:
+
+- The app runs on Windows, macOS and Linux. Phone recordings (`.m4a`) are converted automatically
+  by the ffmpeg that comes with the `imageio-ffmpeg` package, so nothing extra has to be installed.
+- **macOS only:** XGBoost needs the OpenMP library. If the app stops with
+  `libxgboost.dylib could not be loaded`, run `brew install libomp` once.
+- Photos must be `.jpg` or `.png` (iPhone `.heic` files are not supported; export them as JPG).
 
 ## Run
 
@@ -32,16 +39,18 @@ accepted, the path to a voice recording. Dragging a file into the terminal types
    - the model's confidence is at least `face_threshold` (0.60), and
    - the photo's embedding has a cosine similarity of at least `face_min_similarity` (0.60) with
      that member's enrolled photos in `datasets/image_features.csv`.
-2. **Voice verification.** The recording goes through `audio_pipeline.py` and the voiceprint model
-   names the best-matching speaker. The prediction is approved only if
+2. **Product recommendation model.** A recognised face unlocks the product model. It runs on the
+   member's customer record from `datasets/merged_customer_data.csv`, and the prediction is held
+   without being shown.
+3. **Voice verification.** The recording goes through `audio_pipeline.py` and the voiceprint model
+   names the best-matching speaker. The held prediction is displayed only if
    - the speaker is the **same member** the face step identified,
    - the model's confidence is at least `voice_threshold` (0.60), and
    - the recording is within `voice_max_distance` (10.0) of that member's enrolled recordings in
      `audio_features.csv`, measured in standardised feature space.
-3. **Product recommendation.** Only after both steps pass, the product model runs on the member's
-   customer record from `datasets/merged_customer_data.csv` and the top 3 categories are shown.
 
-A failure at any step prints `ACCESS DENIED` and stops; the product model is never called. Every
+A failed face check prints `ACCESS DENIED` and the product model is never called. A failed voice
+check prints `ACCESS DENIED` and the held prediction is discarded without being shown. Every
 attempt is appended to `logs/access_log.csv` (menu option 2 shows the last ten).
 
 **Why the similarity and distance checks exist.** Both classifiers can only answer with one of the
