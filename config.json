@@ -3,16 +3,13 @@
   "face_scaler": "models/face_scaler.pkl",
   "voice_model": "models/voiceprint_model.joblib",
   "product_model": "models/product_recommendation_model.joblib",
-
-  "image_features_csv": "datasets/image_features.csv",
+  "image_features_csv": "datasets/image_features (1).csv",
   "audio_features_csv": "audio_features.csv",
   "merged_dataset": "datasets/merged_customer_data.csv",
-
-  "face_threshold": 0.60,
-  "voice_threshold": 0.60,
-  "face_min_similarity": 0.60,
+  "face_threshold": 0.6,
+  "voice_threshold": 0.6,
+  "face_min_similarity": 0.6,
   "voice_max_distance": 10.0,
-
   "users": {
     "honette": 151,
     "steven": 187,
