@@ -114,7 +114,6 @@ To be added.
 
 ## 4. System simulation (CLI application)
 
-Done by Marie Honette Ihozo. Full guide: [CLI_APP.md](CLI_APP.md).
 
 `app.py` runs the whole flow from the command line. A face photo is checked by the facial
 recognition model; a recognised face unlocks the product recommendation model, whose prediction is
